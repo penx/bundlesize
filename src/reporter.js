@@ -23,6 +23,8 @@ const setBuildStatus = ({
     }
     build.pass(globalMessage, url)
   }
+
+  debug('global message', globalMessage)
 }
 
 const analyse = (files, masterValues) => {
@@ -73,6 +75,7 @@ const analyse = (files, masterValues) => {
   return {
     results,
     failures,
+    fail: !!failures,
     totalMaxSize,
     totalSize,
     totalSizeMaster
@@ -124,6 +127,7 @@ const compare = (files, masterValues = {}) => {
   const {
     results,
     failures,
+    fail,
     totalMaxSize,
     totalSize,
     totalSizeMaster
@@ -137,15 +141,9 @@ const compare = (files, masterValues = {}) => {
     totalSizeMaster
   })
 
-  debug('globalMessage', globalMessage)
-
   /* prepare the build page */
-  const buildFiles = Object.assign({}, results)
-  delete buildFiles.fail
-  delete buildFiles.change
-  delete buildFiles.message
   const params = encodeURIComponent(
-    JSON.stringify({ files: buildFiles, repo, branch, commit_message, sha })
+    JSON.stringify({ files, repo, branch, commit_message, sha })
   )
   let url = `https://bundlesize-store.now.sh/build?info=${params}`
 
@@ -158,9 +156,9 @@ const compare = (files, masterValues = {}) => {
       debug('url after shortening', url)
       setBuildStatus({
         url,
-        files: results,
+        files,
         globalMessage,
-        fail: !!failures,
+        fail,
         event,
         branch
       })
@@ -169,9 +167,9 @@ const compare = (files, masterValues = {}) => {
       debug('err while shortening', err)
       setBuildStatus({
         url,
-        files: results,
+        files,
         globalMessage,
-        fail: !!failures,
+        fail,
         event,
         branch
       })
