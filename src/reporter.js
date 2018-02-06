@@ -25,7 +25,7 @@ const setBuildStatus = ({
   }
 }
 
-const compare = (files, masterValues = {}) => {
+const analyse = (files, masterValues) => {
   let failures = 0
   let totalSize = 0
   let totalSizeMaster = 0
@@ -70,40 +70,72 @@ const compare = (files, masterValues = {}) => {
     }
   })
 
-  let globalMessage
+  return {
+    results,
+    failures,
+    totalMaxSize,
+    totalSize,
+    totalSizeMaster
+  }
+}
 
+const getMessage = ({
+  results,
+  failures,
+  totalMaxSize,
+  totalSize,
+  totalSizeMaster
+}) => {
+  let globalMessage
   if (results.length === 1) {
     const { message } = results[0]
     globalMessage = message
+  } else if (failures === 1) {
+    // multiple files, one failure
+    const result = results.find(result => result.fail)
+    const { message } = result
+
+    globalMessage = message
+  } else if (failures) {
+    // multiple files, multiple failures
+    const change = totalSize - totalSizeMaster
+    const prettyChange =
+      change === 0
+        ? 'no change'
+        : change > 0 ? `+${bytes(change)}` : `-${bytes(Math.abs(change))}`
+
+    globalMessage = `${failures} out of ${results.length} bundles are too big! (${prettyChange})`
   } else {
-    if (failures === 1) {
-      // multiple files, one failure
-      const result = results.find(result => result.fail)
-      const { message } = result
+    // multiple files, no failures
+    const prettySize = bytes(totalSize)
+    const prettyMaxSize = bytes(totalMaxSize)
+    const change = totalSize - totalSizeMaster
+    const prettyChange =
+      change === 0
+        ? 'no change'
+        : change > 0 ? `+${bytes(change)}` : `-${bytes(Math.abs(change))}`
 
-      globalMessage = message
-    } else if (failures) {
-      // multiple files, multiple failures
-      const change = totalSize - totalSizeMaster
-      const prettyChange =
-        change === 0
-          ? 'no change'
-          : change > 0 ? `+${bytes(change)}` : `-${bytes(Math.abs(change))}`
-
-      globalMessage = `${failures} out of ${results.length} bundles are too big! (${prettyChange})`
-    } else {
-      // multiple files, no failures
-      const prettySize = bytes(totalSize)
-      const prettyMaxSize = bytes(totalMaxSize)
-      const change = totalSize - totalSizeMaster
-      const prettyChange =
-        change === 0
-          ? 'no change'
-          : change > 0 ? `+${bytes(change)}` : `-${bytes(Math.abs(change))}`
-
-      globalMessage = `Total bundle size is ${prettySize}/${prettyMaxSize} gzip (${prettyChange})`
-    }
+    globalMessage = `Total bundle size is ${prettySize}/${prettyMaxSize} gzip (${prettyChange})`
   }
+  return globalMessage
+}
+
+const compare = (files, masterValues = {}) => {
+  const {
+    results,
+    failures,
+    totalMaxSize,
+    totalSize,
+    totalSizeMaster
+  } = analyse(files, masterValues)
+
+  let globalMessage = getMessage({
+    results,
+    failures,
+    totalMaxSize,
+    totalSize,
+    totalSizeMaster
+  })
 
   debug('globalMessage', globalMessage)
 
