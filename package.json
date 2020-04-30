@@ -15,7 +15,9 @@
   "scripts": {
     "precommit": "lint-staged",
     "test": "node index && cat pipe.js | node pipe --name pipe.js --max-size 1kB",
-    "lint": "eslint src store/*.js"
+    "lint": "eslint src store/*.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "library",
@@ -44,7 +46,8 @@
     "opencollective": "^1.0.3",
     "gzip-size": "^4.0.0",
     "prettycli": "^1.4.3",
-    "read-pkg-up": "^3.0.0"
+    "read-pkg-up": "^3.0.0",
+    "snyk": "^1.316.1"
   },
   "bundlesize": [
     {
@@ -89,5 +92,6 @@
     "type": "opencollective",
     "url": "https://opencollective.com/bundlesize",
     "logo": "https://opencollective.com/opencollective/logo.txt"
-  }
+  },
+  "snyk": true
 }
