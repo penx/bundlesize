@@ -39,7 +39,7 @@
     "bytes": "^3.0.0",
     "ci-env": "^1.4.0",
     "commander": "^2.11.0",
-    "github-build": "^1.2.0",
+    "github-build": "^1.2.2",
     "glob": "^7.1.2",
     "opencollective": "^1.0.3",
     "gzip-size": "^4.0.0",
